@@ -9,8 +9,7 @@ from skbio import TabularMSA, DNA
 
 start = time.time()
 
-msa_length = 10
-model = "K2P"
+msa_length = 1000
 outputFilename = "msa.phylip"
 
 edges = ["a", "b", "c", "d", "e", "f", "g", "h"]
@@ -19,18 +18,18 @@ substitutionRates = dict()
 generageEdgeRates = True
 generateGamma = True
 rate = "random"
+networkString = "(0,1,2,3)"
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:],"hm:s:p:g:l:o:r:")
+	opts, args = getopt.getopt(sys.argv[1:],"hs:p:g:l:o:r:n:")
 except getopt.GetoptError:
 	print("Option not recognised.")
-	print("python simulate.py -m <model> -l <MSA length> -s <seed> -g <gamma parameter> -o <output filename>")
+	print("python simulate.py -l <MSA length> -s <seed> -g <gamma parameter> -o <output filename> -n <network string>")
 	print("python simulate.py -h for further usage instructions.")
 	sys.exit(2)
 for opt, arg in opts:
 	if opt == "-h":
-		print("python simulate.py -m <model> -l <MSA length> -s <seed> -p <edge parameters> -g <gamma parameter> -o <output filename>")
-		print("-m <model>\t\t One of JC, K2P, or K3P")
+		print("python simulate.py -l <MSA length> -s <seed> -p <edge parameters> -g <gamma parameter> -o <output filename>")
 		print("-l <MSA length>\t\t Length of MSA to output")
 		print("-s <seed>\t\t Integer value for seeding random numbers")
 		print("-p <edge parameters>\t\t Comma-separated list of values giving the probability of mutation along each edge.")
@@ -70,37 +69,50 @@ for opt, arg in opts:
 		generageEdgeRates = False	
 	elif opt in ("-r"):
 		rate = arg
-#	 elif opt in("-m"):
-#	 	model = arg.upper()
-#	 	if model == "JC":
-#
-#		elif model == "K2P":
-#
-#		elif model == "K3P":
-#
-#		else:
-#			print("Could not understand model(-m) argument. Use either JC, K2P, or K3P.")
-#			sys.exit(2)
+	elif opt in ("-n"):
+		networkString = arg
+
+networkPermutationString = networkString.strip("()").split(",")
+networkPermutation = [int(leaf) for leaf in networkPermutationString]
+inversePermutation = np.argsort(networkPermutation)
 
 if generateGamma:
 	treeRate = random.random()
 
 if generageEdgeRates:
-	for edge in edges:
-		if rate == "low":
-			alpha = random.uniform(0.99, 1)
-			gamma = random.uniform(0,0.001)
-			beta = random.uniform(0,0.001)
-		elif rate == "medium":
-			alpha = random.uniform(0.85, 0.95)
-			gamma = random.uniform(0,0.03)
+	if rate == "mixed":
+		for edge in ["a","b","d","e","g"]:
+			alpha = random.uniform(0.95, 0.99)
 			beta = random.uniform(0,0.01)
-		else:
-			alpha = random.random()
-			gamma = random.random()
-			beta = random.random()
-		randomSum = alpha + gamma + 2 * beta
-		substitutionRates[edge] = [alpha/randomSum, beta/randomSum, gamma/randomSum]
+			gamma = random.uniform(0,0.01)
+			total = alpha + 2*beta + gamma
+			substitutionRates[edge] = [alpha/total, beta/total, gamma/total]
+		for edge in ["c","f","h"]:
+			alpha = random.uniform(0.85, 0.95)
+			beta = random.uniform(0,0.05)
+			gamma = random.uniform(0,0.05)
+			total = alpha + 2*beta + gamma
+			substitutionRates[edge] = [alpha/total, beta/total, gamma/total]
+	else:
+		for edge in edges:
+			if rate == "very_low":
+				alpha = random.uniform(0.99, 1)
+				beta = random.uniform(0,0.0025)
+				gamma = random.uniform(0,0.0025)				
+			elif rate == "low":
+				alpha = random.uniform(0.95, 0.99)
+				beta = random.uniform(0,0.01)
+				gamma = random.uniform(0,0.01)
+			elif rate == "medium":
+				alpha = random.uniform(0.85, 0.95)
+				beta = random.uniform(0,0.05)
+				gamma = beta = random.uniform(0,0.05)		
+			else:
+				alpha = random.random()
+				beta = random.random()
+				gamma = random.random()
+			total = alpha + 2*beta + gamma
+			substitutionRates[edge] = [alpha/total, beta/total, gamma/total]
 
 print("Simulating alignments with parameters: ")
 print("Tree Ratio = " + str(treeRate))
@@ -122,36 +134,36 @@ def mutate_K2P(start_nucl, edge_param):
 		if rand < edge_param[0]:
 			return "A"
 		elif rand < edge_param[0] + edge_param[2]:
-			return "C"
+			return "G"
 		elif rand < edge_param[0] + edge_param[2] + edge_param[1]:
-			return "G"
-		else:
-			return "T"
-	elif start_nucl == "C":
-		if rand < edge_param[2]:
-			return "A"
-		elif rand < edge_param[2] + edge_param[0]:
 			return "C"
-		elif rand < edge_param[2] + edge_param[0] + edge_param[1]:
-			return "G"
 		else:
 			return "T"
 	elif start_nucl == "G":
+		if rand < edge_param[2]:
+			return "A"
+		elif rand < edge_param[2] + edge_param[0]:
+			return "G"
+		elif rand < edge_param[2] + edge_param[0] + edge_param[1]:
+			return "C"
+		else:
+			return "T"
+	elif start_nucl == "C":
 		if rand < edge_param[1]:
 			return "A"
 		elif rand < edge_param[1] + edge_param[1]:
-			return "C"
-		elif rand < edge_param[1] + edge_param[1] + edge_param[0]:
 			return "G"
+		elif rand < edge_param[1] + edge_param[1] + edge_param[0]:
+			return "C"
 		else:
 			return "T"
 	else: # start_nucl == "T":
 		if rand < edge_param[1]:
 			return "A"
 		elif rand < edge_param[1] + edge_param[1]:
-			return "C"
-		elif rand < edge_param[1] + edge_param[1] + edge_param[2]:
 			return "G"
+		elif rand < edge_param[1] + edge_param[1] + edge_param[2]:
+			return "C"
 		else:
 			return "T"
 
@@ -173,11 +185,13 @@ for i in range(msa_length):
 	sequence_2 += mutate_K2P(rv_4, substitutionRates["c"])
 	sequence_3 += mutate_K2P(rv_root, substitutionRates["d"])
 
-seqs = [DNA(sequence_0, metadata={"id":"Taxon0"}), 
-				DNA(sequence_1, metadata={"id":"Taxon1"}), 
-				DNA(sequence_2, metadata={"id":"Taxon2"}), 
-				DNA(sequence_3, metadata={"id":"Taxon3"})]
-aln = TabularMSA(seqs, minter="id")
+seqs = [DNA(sequence_0, metadata={"id":"Taxon" + str(networkPermutation[0])}), 
+		DNA(sequence_1, metadata={"id":"Taxon" + str(networkPermutation[1])}), 
+		DNA(sequence_2, metadata={"id":"Taxon" + str(networkPermutation[2])}), 
+		DNA(sequence_3, metadata={"id":"Taxon" + str(networkPermutation[3])})]
+
+permutedSeqs = [seqs[inversePermutation[0]],seqs[inversePermutation[1]], seqs[inversePermutation[2]], seqs[inversePermutation[3]]]
+aln = TabularMSA(permutedSeqs, minter="id")
 
 f = open(outputFilename, "w")
 aln.write(f, format='phylip')

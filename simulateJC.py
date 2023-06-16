@@ -10,7 +10,6 @@ from skbio import TabularMSA, DNA
 start = time.time()
 
 msa_length = 1000
-model = "JC"
 outputFilename = "msa.phylip"
 
 edges = ["a", "b", "c", "d", "e", "f", "g", "h"]
@@ -22,16 +21,15 @@ biologyModel = False
 rate = ""
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:],"hm:s:p:g:l:o:br:")
+	opts, args = getopt.getopt(sys.argv[1:],"hs:p:g:l:o:br:")
 except getopt.GetoptError:
 	print("Option not recognised.")
-	print("python simulate.py -m <model> -l <MSA length> -s <seed> -p <edge parameters> -g <gamma parameter> -o <output filename>")
+	print("python simulate.py -l <MSA length> -s <seed> -p <edge parameters> -g <gamma parameter> -o <output filename>")
 	print("python simulate.py -h for further usage instructions.")
 	sys.exit(2)
 for opt, arg in opts:
 	if opt == "-h":
-		print("python simulate.py -m <model> -l <MSA length> -s <seed> -p <edge parameters> -g <gamma parameter> -o <output filename>")
-		print("-m <model>\t\t One of JC, K2P, or K3P")
+		print("python simulate.py -l <MSA length> -s <seed> -p <edge parameters> -g <gamma parameter> -o <output filename>")
 		print("-l <MSA length>\t\t Length of MSA to output")
 		print("-s <seed>\t\t Integer value for seeding random numbers")
 		print("-p <edge parameters>\t\t Comma-separated list of values giving the probability of mutation along each edge.")
@@ -69,17 +67,6 @@ for opt, arg in opts:
 		biologyModel = True	
 	elif opt in ("-r"):
 		rate = arg
-#	 elif opt in("-m"):
-#	 	model = arg.upper()
-#	 	if model == "JC":
-#
-#		elif model == "K2P":
-#
-#		elif model == "K3P":
-#
-#		else:
-#			print("Could not understand model(-m) argument. Use either JC, K2P, or K3P.")
-#			sys.exit(2)
 
 if generateGamma:
 	gamma = random.random()
