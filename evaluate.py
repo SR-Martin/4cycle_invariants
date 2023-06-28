@@ -88,7 +88,7 @@ try:
 	opts, args = getopt.getopt(sys.argv[1:],"ha:i:s:")
 except getopt.GetoptError:
 	print("Option not recognised.")
-	print("python evaluate.py  -a <MSA file> -i <invariants file> -s <scoring method>")
+	print("python evaluate.py -a <MSA file> -i <invariants file> -s <scoring method>")
 	print("python evaluate.py -h for further usage instructions.")
 	sys.exit(2)
 for opt, arg in opts:
@@ -102,8 +102,6 @@ for opt, arg in opts:
 		MSAFilename = arg
 	elif opt in ("-i"):
 		NetworkGBFilename = arg
-	elif opt in("-m"):
-		model = arg.upper()
 	elif opt in ("-s"):
 		if arg.lower() == "1norm":
 			scoringFunction = get1Norm
@@ -177,10 +175,9 @@ for poly in networkPolys:
 for MSA in msas:
 	labelString = "(Leaf 0: " + str(MSA.index[0]) + ", Leaf 1: " + str(MSA.index[1]) + ", Leaf 2: " + str(MSA.index[2]) + ", Leaf 3: " + str(MSA.index[3]) + ")"
 	dictionaryString = "("+ str(MSA.index[0]) + "," + str(MSA.index[1]) + "," + str(MSA.index[2]) + "," + str(MSA.index[3]) + ")"
-	outputString = "("+ str(MSA.index[0])[-1] + str(MSA.index[1])[-1] + str(MSA.index[2])[-1] + str(MSA.index[3])[-1] + ")"
 	
 	for poly in networkPolys:
-			invariant_values[poly.getPolyString()][outputString] = 0
+			invariant_values[poly.getPolyString()][dictionaryString] = 0
 
 	# The 2-cycle (13) gives the same network, so we would like the result to be the same in both cases
 	# We achieve this by calculating the frequency scores for both networks.
@@ -222,28 +219,27 @@ for MSA in msas:
 						transformed[i,j,k,l] = mpmath.fdiv(transformed_value, mpmath.power(4,4))
 
 		for poly in networkPolys:
-			invariantSum = mpmath.fadd(invariant_values[poly.getPolyString()][outputString], mpmath.fabs(poly.evaluate_mpm(transformed)))
-			invariant_values[poly.getPolyString()][outputString] = invariantSum
+			invariantSum = mpmath.fadd(invariant_values[poly.getPolyString()][dictionaryString], mpmath.fabs(poly.evaluate_mpm(transformed)))
+			invariant_values[poly.getPolyString()][dictionaryString] = invariantSum
 
 	# divide by the number of symmetric MSAs for each invariant, to get the mean abs.
 	for poly in networkPolys:
-		invariant_values[poly.getPolyString()][outputString] = mpmath.fdiv(invariant_values[poly.getPolyString()][outputString], 2)
+		invariant_values[poly.getPolyString()][dictionaryString] = mpmath.fdiv(invariant_values[poly.getPolyString()][dictionaryString], 2)
 
 print("Evaluating alignment with total length (without gaps): " + str(count))	
 for MSA in msas:
 	labelString = "(Leaf 0: " + str(MSA.index[0]) + ", Leaf 1: " + str(MSA.index[1]) + ", Leaf 2: " + str(MSA.index[2]) + ", Leaf 3: " + str(MSA.index[3]) + ")"
 	dictionaryString = "("+ str(MSA.index[0]) + "," + str(MSA.index[1]) + "," + str(MSA.index[2]) + "," + str(MSA.index[3]) + ")"
-	outputString = "("+ str(MSA.index[0])[-1] + str(MSA.index[1])[-1] + str(MSA.index[2])[-1] + str(MSA.index[3])[-1] + ")"		
 	networkValues = list()
 
 	for poly in networkPolys:
-		val = invariant_values[poly.getPolyString()][outputString]
+		val = invariant_values[poly.getPolyString()][dictionaryString]
 		networkValues.append(val)
 
 	if not climbingScore:
 		score = scoringFunction(networkValues)
 	else:
-		score = getClimbingScore(outputString)
+		score = getClimbingScore(dictionaryString)
 	networkNorms[dictionaryString] = score
 
 sortedScores = sorted(networkNorms.items(), key=operator.itemgetter(1))
