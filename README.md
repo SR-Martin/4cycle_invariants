@@ -10,7 +10,7 @@ pip install mpmath
 
 Code to calculate phylogenetic invariants is written in Macaulay2, available from https://www.macaulay2.com/.
 
-The 4-leaf, 4-cycle network from which data is simulated is displayed below. Leaves are labelled by the integers 0,1,2, and 3 in some order. 
+The 4-leaf, 4-cycle network from which data is simulated is displayed below. Leaves are labelled by the integers 0,1,2, and 3 in some order, e.g. the leaf-labelled network below is denoted (0,1,2,3).
 
 <img src="/docs/images/4cycle.png" alt="4-cycle network" width="250" height="250">
 
@@ -44,7 +44,7 @@ To simulate an alignment of 1,000,000 base-pairs with tree-ratio 0.75 and define
 ```console
 python simulateJC.py -n '(0,1,2,3)' -g 0.75 -p 0.01,0.013,0.02,0.005,0.01,0.006,0.007,0.015 -l 1000000 -s 1 -o alignment_2.phylip
 ```
-
+Here the edge parameters are in the order a,b,c,d,e,f,g,h (as in the image above).
 
 ## simulateK2P.py
 As simulateJC.py but simulates according to the K2P substitution model.
