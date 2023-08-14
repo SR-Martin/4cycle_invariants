@@ -32,8 +32,8 @@ for opt, arg in opts:
 		print("python simulate.py -l <MSA length> -s <seed> -p <edge parameters> -g <gamma parameter> -o <output filename>")
 		print("-l <MSA length>\t\t Length of MSA to output")
 		print("-s <seed>\t\t Integer value for seeding random numbers")
-		print("-p <edge parameters>\t\t Comma-separated list of values giving the probability of mutation along each edge.")
-		print("-g <gamma parameter>\t\t Floating point value giving the probability of a site evolving along edge e in the network.")
+		print("-p <edge parameters>\t\t Comma-separated list of values giving the probability of substitution along each edge.")
+		print("-g <gamma parameter>\t\t Floating point value giving the probability of a site evolving along the reticulation edge closest to leaf 3 in the network.")
 		print("-o <output filename>\t Filename for output MSA in phylip format")
 		sys.exit()
 	elif opt in ("-o"):
@@ -72,9 +72,9 @@ if generateGamma:
 	gamma = random.random()
 if generageEdgeRates:
 	for edge in edges:
-		if rate == "very_low":
+		if rate == "low":
 			substitutionRates[edge] = random.uniform(0,0.001)
-		elif rate == "low":
+		elif rate == "medium":
 			substitutionRates[edge] = random.uniform(0,0.01)
 		else:
 			substitutionRates[edge] = random.random()
