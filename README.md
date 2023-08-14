@@ -12,7 +12,7 @@ Code to calculate phylogenetic invariants is written in Macaulay2, available fro
 
 The 4-leaf, 4-cycle network from which data is simulated is displayed below. Leaves are labelled by the integers 0,1,2, and 3 in some order. 
 
-![4-cycle network](/4cycle_invariants/docs/assets/images/4cycle.pdf)
+![4-cycle network](/docs/assets/images/4cycle.pdf)
 
 ## evaluate.py
 
