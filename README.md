@@ -72,7 +72,7 @@ Tree-like evolution detected with tree ((Taxon2,Taxon3),(Taxon0,Taxon1)).
 
 ## evaluate.py
 
-Evaluates the supplied invariants on all 12 possible 4-leaf 4-cycle networks and writes a score for each to standard output.
+Evaluates the supplied invariants on all 12 possible 4-leaf 4-cycle networks and writes a score for each to standard output, as above. The script attempts to detect evolution that has been tree-like, and identifies the 4-leaf tree.
 ```console
 python evaluate.py -i invariants/4LeafK2P_GB_deg3.txt -a /path/to/alignment.phylip
 ```
