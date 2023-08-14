@@ -14,6 +14,62 @@ The 4-leaf, 4-cycle network from which data is simulated is displayed below. Lea
 
 <img src="/docs/images/4cycle.png" alt="4-cycle network" width="250" height="250">
 
+### Installation
+
+The software does not require installation, simply install the dependencies above, clone the repository, and run the scripts.
+
+```console
+git clone https://github.com/SR-Martin/4cycle_invariants.git
+cd 4cycle_invariants
+```
+
+There are two example datasets with the repository. The first is a simulated alignment from the network (0,1,2,3) under the K2P substitution model. Running
+
+```console
+python evaluate.py -i invariants/4LeafK2P_GB_deg3.txt -a example_data/network_0123_K2P_100000.phylip
+```
+
+should give (after a couple of minutes)
+
+```console
+1: (Taxon0,Taxon1,Taxon2,Taxon3)	7.27211e-9
+2: (Taxon3,Taxon0,Taxon1,Taxon2)	1.11965e-8
+3: (Taxon1,Taxon0,Taxon3,Taxon2)	1.36818e-8
+4: (Taxon2,Taxon1,Taxon0,Taxon3)	1.70732e-8
+5: (Taxon0,Taxon2,Taxon1,Taxon3)	1.66039e-7
+6: (Taxon2,Taxon0,Taxon3,Taxon1)	1.79623e-7
+7: (Taxon3,Taxon0,Taxon2,Taxon1)	1.80426e-7
+8: (Taxon1,Taxon2,Taxon0,Taxon3)	1.8475e-7
+9: (Taxon0,Taxon1,Taxon3,Taxon2)	2.64079e-7
+10: (Taxon3,Taxon1,Taxon0,Taxon2)	2.77587e-7
+11: (Taxon2,Taxon0,Taxon1,Taxon3)	2.92029e-7
+12: (Taxon1,Taxon0,Taxon2,Taxon3)	3.09538e-7
+```
+Note that the score for the network that generated the alignment is an order of magnitude lower than the others.
+
+Evolution that has been tree like is detected automatically. The command
+
+```console
+python evaluate.py -i invariants/4LeafK2P_GB_deg3.txt -a example_data/tree_01-23_100000.phylip
+```
+gives
+
+```console
+1: (Taxon1,Taxon0,Taxon3,Taxon2)	2.72771e-9
+2: (Taxon0,Taxon1,Taxon2,Taxon3)	2.90057e-9
+3: (Taxon3,Taxon0,Taxon1,Taxon2)	3.13039e-9
+4: (Taxon1,Taxon0,Taxon2,Taxon3)	3.14916e-9
+5: (Taxon0,Taxon1,Taxon3,Taxon2)	3.23117e-9
+6: (Taxon2,Taxon1,Taxon0,Taxon3)	3.31187e-9
+7: (Taxon2,Taxon0,Taxon1,Taxon3)	3.48568e-9
+8: (Taxon3,Taxon1,Taxon0,Taxon2)	4.52525e-9
+9: (Taxon2,Taxon0,Taxon3,Taxon1)	2.34451e-7
+10: (Taxon1,Taxon2,Taxon0,Taxon3)	2.41453e-7
+11: (Taxon0,Taxon2,Taxon1,Taxon3)	2.56563e-7
+12: (Taxon3,Taxon0,Taxon2,Taxon1)	2.63093e-7
+Tree-like evolution detected with tree ((Taxon2,Taxon3),(Taxon0,Taxon1)).
+```
+
 ## evaluate.py
 
 Evaluates the supplied invariants on all 12 possible 4-leaf 4-cycle networks and writes a score for each to standard output.
