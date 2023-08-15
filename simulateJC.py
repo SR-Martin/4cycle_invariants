@@ -10,6 +10,7 @@ from skbio import TabularMSA, DNA
 start = time.time()
 
 msa_length = 1000
+model = "JC"
 outputFilename = "msa.phylip"
 
 edges = ["a", "b", "c", "d", "e", "f", "g", "h"]
@@ -19,12 +20,13 @@ generageEdgeRates = True
 generateGamma = True
 biologyModel = False
 rate = ""
+networkString = "(0,1,2,3)"
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:],"hs:p:g:l:o:br:")
+	opts, args = getopt.getopt(sys.argv[1:],"hs:p:g:l:o:br:n:")
 except getopt.GetoptError:
 	print("Option not recognised.")
-	print("python simulate.py -l <MSA length> -s <seed> -p <edge parameters> -g <gamma parameter> -o <output filename>")
+	print("python simulate.py -l <MSA length> -s <seed> -p <edge parameters> -g <gamma parameter> -o <output filename> -n <network string>")
 	print("python simulate.py -h for further usage instructions.")
 	sys.exit(2)
 for opt, arg in opts:
@@ -32,8 +34,8 @@ for opt, arg in opts:
 		print("python simulate.py -l <MSA length> -s <seed> -p <edge parameters> -g <gamma parameter> -o <output filename>")
 		print("-l <MSA length>\t\t Length of MSA to output")
 		print("-s <seed>\t\t Integer value for seeding random numbers")
-		print("-p <edge parameters>\t\t Comma-separated list of values giving the probability of substitution along each edge.")
-		print("-g <gamma parameter>\t\t Floating point value giving the probability of a site evolving along the reticulation edge closest to leaf 3 in the network.")
+		print("-p <edge parameters>\t\t Comma-separated list of values giving the probability of mutation along each edge.")
+		print("-g <gamma parameter>\t\t Floating point value giving the probability of a site evolving along edge e in the network.")
 		print("-o <output filename>\t Filename for output MSA in phylip format")
 		sys.exit()
 	elif opt in ("-o"):
@@ -45,7 +47,7 @@ for opt, arg in opts:
 	elif opt in ("-p"):
 		parameters = arg.split(",")
 		if len(parameters) != 8:
-			print ("Error: User must supply all edge paramters or none.")
+			print ("Error: User must supply all edge parameters or none.")
 			sys.exit(2)
 		i = 0
 		for param in parameters:
@@ -67,17 +69,35 @@ for opt, arg in opts:
 		biologyModel = True	
 	elif opt in ("-r"):
 		rate = arg
+	elif opt in ("-n"):
+		networkString = arg
+
+networkPermutationString = networkString.strip("()").split(",")
+networkPermutation = [int(leaf) for leaf in networkPermutationString]
+inversePermutation = np.argsort(networkPermutation)
 
 if generateGamma:
 	gamma = random.random()
 if generageEdgeRates:
-	for edge in edges:
-		if rate == "low":
-			substitutionRates[edge] = random.uniform(0,0.001)
-		elif rate == "medium":
-			substitutionRates[edge] = random.uniform(0,0.01)
-		else:
-			substitutionRates[edge] = random.random()
+	if rate == "mixed":
+		substitutionRates["a"] = random.uniform(0,0.001)
+		substitutionRates["b"] = random.uniform(0.001,0.01)
+		substitutionRates["c"] = random.uniform(0.01, 0.1)
+		substitutionRates["d"] = random.uniform(0,0.001)
+		substitutionRates["e"] = random.uniform(0,0.001)
+		substitutionRates["f"] = random.uniform(0.001,0.01)
+		substitutionRates["g"] = random.uniform(0.001,0.01)
+		substitutionRates["h"] = random.uniform(0.01, 0.1)
+	else:
+		for edge in edges:
+			if rate == "very_low":
+				substitutionRates[edge] = random.uniform(0,0.001)
+			elif rate == "low":
+				substitutionRates[edge] = random.uniform(0.001,0.01)
+			elif rate == "medium":
+				substitutionRates[edge] = random.uniform(0.01, 0.1)
+			else:
+				substitutionRates[edge] = random.random()
 
 if biologyModel:
 	for edge in edges:
@@ -128,11 +148,13 @@ for i in range(msa_length):
 	sequence_2 += mutate_JC(rv_root, substitutionRates["c"])
 	sequence_3 += mutate_JC(rv_4, substitutionRates["d"])
 
-seqs = [DNA(sequence_0, metadata={"id":"Taxon0"}), 
-				DNA(sequence_1, metadata={"id":"Taxon1"}), 
-				DNA(sequence_2, metadata={"id":"Taxon2"}), 
-				DNA(sequence_3, metadata={"id":"Taxon3"})]
-aln = TabularMSA(seqs, minter="id")
+seqs = [DNA(sequence_0, metadata={"id":"Taxon" + str(networkPermutation[0])}), 
+		DNA(sequence_1, metadata={"id":"Taxon" + str(networkPermutation[1])}), 
+		DNA(sequence_2, metadata={"id":"Taxon" + str(networkPermutation[2])}), 
+		DNA(sequence_3, metadata={"id":"Taxon" + str(networkPermutation[3])})]
+
+permutedSeqs = [seqs[inversePermutation[0]],seqs[inversePermutation[1]], seqs[inversePermutation[2]], seqs[inversePermutation[3]]]
+aln = TabularMSA(permutedSeqs, minter="id")
 
 f = open(outputFilename, "w")
 aln.write(f, format='phylip')

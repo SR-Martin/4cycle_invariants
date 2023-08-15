@@ -79,7 +79,7 @@ python evaluate.py -i invariants/4LeafK2P_GB_deg3.txt -a /path/to/alignment.phyl
 
 ## simulateJC.py
 
-Simulates multiple sequence alignment data in phylip format, according to the JC msubstition model, on the specified 4-leaf 4-cycle network. Substitution parameters and the tree-ratio can either be specified or randomly generated, and are written to standard output. The `-r` flag accepts "low" (0.1% chance of substitution along edge) or "medium" (1% chance of substitution along edge) when randomly generating substitution parameters. 
+Simulates multiple sequence alignment data in phylip format, according to the JC substition model, on the specified 4-leaf 4-cycle network. Substitution parameters and the tree-ratio can either be specified or randomly generated, and are written to standard output. The `-r` flag accepts "low" (0 - 0.1% chance of substitution along edge) or "medium" (0-1% chance of substitution along edge) when randomly generating substitution parameters. 
 
 ```console
 python simulate.py -l <MSA length> -s <seed> -p <edge parameters> -g <gamma parameter> -o <output filename>
