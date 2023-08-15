@@ -2,7 +2,7 @@
 Files for inference of 4-leaf 4-cycle phylogenetic networks from aligned DNA sequence data. Simulation scripts for simulating aligned sequence data along a 4-leaf 4-cycle network under the Jukes-Cantor (JC) and Kimura 2-parameter (K2P) substitution models.
 
 ## Dependencies
-Scripts are written in Python3 and use the libraries sci-kit bio (requires Python v3.8 or later) and mp-math. 
+Scripts are written in Python3 and use the libraries scikit-bio (requires Python v3.8 or later) and mpmath. 
 ```console
 pip install scikit-bio
 pip install mpmath
