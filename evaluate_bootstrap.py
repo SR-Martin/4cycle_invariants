@@ -86,14 +86,14 @@ def getFrequenciesFromPermutation(frequencyArray, permutation):
 					returnArray[permutedIndex] = frequencyArray[index]
 	return returnArray
 
-def evaluateBootstrap(MSA, invariants, numSamples, seed):
+def evaluateBootstrap(MSA, invariants, numSamples, seed, model):
 	#print("Sampling " + str(x+1) + " of " + str(numberOfBootstraps))
 	invariant_values = dict()
 	permutations = [(0,1,2,3),(0,2,1,3),(0,1,3,2),(1,2,0,3),(1,0,2,3),(1,0,3,2),(2,1,0,3),(2,0,1,3),(2,0,3,1),(3,1,0,2),(3,0,1,2),(3,0,2,1)]
 	random.seed(seed)
 	allScores = dict()
-	multiplierForTrees1 = 3
-	multiplierForTrees2 = 2
+	multiplierForTrees1 = 5
+	multiplierForTrees2 = 5
 
 	for poly in invariants:
 		invariant_values[poly.getPolyString()] = dict()
@@ -132,6 +132,211 @@ def evaluateBootstrap(MSA, invariants, numSamples, seed):
 										transformed_value = mpmath.fadd(transformed_value, mpmath.fprod([Chi(i,w), Chi(j,x), Chi(k,y), Chi(l,z), originalFrequencies[w,x,y,z]]))
 					originalTransformed[i,j,k,l] = mpmath.fdiv(transformed_value, mpmath.power(4,4))
 
+	if model == "JC":
+		# Average over JC classes
+		val = mpmath.fdiv(originalTransformed[0,0,1,1] + originalTransformed[0,0,2,2] + originalTransformed[0,0,3,3], 3)
+		originalTransformed[0,0,1,1] = val
+		originalTransformed[0,0,2,2] = val
+		originalTransformed[0,0,3,3] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,0,1] + originalTransformed[0,2,0,2] + originalTransformed[0,3,0,3], 3)
+		originalTransformed[0,1,0,1] = val
+		originalTransformed[0,2,0,2] = val
+		originalTransformed[0,3,0,3] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,1,0] + originalTransformed[0,2,2,0] + originalTransformed[0,3,3,0], 3)
+		originalTransformed[0,1,1,0] = val
+		originalTransformed[0,2,2,0] = val
+		originalTransformed[0,3,3,0] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,2,3] + originalTransformed[0,1,3,2] + originalTransformed[0,2,1,3] +
+											originalTransformed[0,2,3,1] + originalTransformed[0,3,1,2] + originalTransformed[0,3,2,1], 6)
+		originalTransformed[0,1,2,3] = val
+		originalTransformed[0,1,3,2] = val
+		originalTransformed[0,2,1,3] = val
+		originalTransformed[0,2,3,1] = val
+		originalTransformed[0,3,1,2] = val
+		originalTransformed[0,3,2,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,0,0,1] + originalTransformed[2,0,0,2] + originalTransformed[3,0,0,3], 3)
+		originalTransformed[1,0,0,1] = val
+		originalTransformed[2,0,0,2] = val
+		originalTransformed[3,0,0,3] = val
+
+		val = mpmath.fdiv(originalTransformed[1,0,2,3] + originalTransformed[1,0,3,2] + originalTransformed[2,0,1,3] +
+											originalTransformed[2,0,3,1] + originalTransformed[3,0,1,2] + originalTransformed[3,0,2,1], 6)
+		originalTransformed[1,0,2,3] = val
+		originalTransformed[1,0,3,2] = val
+		originalTransformed[2,0,1,3] = val
+		originalTransformed[2,0,3,1] = val
+		originalTransformed[3,0,1,2] = val
+		originalTransformed[3,0,2,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,0,0] + originalTransformed[2,2,0,0] + originalTransformed[3,3,0,0], 3)
+		originalTransformed[1,1,0,0] = val
+		originalTransformed[2,2,0,0] = val
+		originalTransformed[3,3,0,0] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,1,1] + originalTransformed[2,2,2,2] + originalTransformed[3,3,3,3], 3)
+		originalTransformed[1,1,1,1] = val
+		originalTransformed[2,2,2,2] = val
+		originalTransformed[3,3,3,3] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,0,3] + originalTransformed[1,3,0,2] + originalTransformed[2,1,0,3] +
+											originalTransformed[2,3,0,1] + originalTransformed[3,1,0,2] + originalTransformed[3,2,0,1], 6)
+		originalTransformed[1,2,0,3] = val
+		originalTransformed[1,3,0,2] = val
+		originalTransformed[2,1,0,3] = val
+		originalTransformed[2,3,0,1] = val
+		originalTransformed[3,1,0,2] = val
+		originalTransformed[3,2,0,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,1,2] + originalTransformed[1,3,1,3] + originalTransformed[2,1,2,1] +
+											originalTransformed[2,3,2,3] + originalTransformed[3,1,3,1] + originalTransformed[3,2,3,2], 6)
+		originalTransformed[1,2,1,2] = val
+		originalTransformed[1,3,1,3] = val
+		originalTransformed[2,1,2,1] = val
+		originalTransformed[2,3,2,3] = val
+		originalTransformed[3,1,3,1] = val
+		originalTransformed[3,2,3,2] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,3,0] + originalTransformed[1,3,2,0] + originalTransformed[2,1,3,0] +
+											originalTransformed[2,3,1,0] + originalTransformed[3,1,2,0] + originalTransformed[3,2,1,0], 6)
+		originalTransformed[1,2,3,0] = val
+		originalTransformed[1,3,2,0] = val
+		originalTransformed[2,1,3,0] = val
+		originalTransformed[2,3,1,0] = val
+		originalTransformed[3,1,2,0] = val
+		originalTransformed[3,2,1,0] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,2,2] + originalTransformed[1,1,3,3] + originalTransformed[2,2,1,1] +
+											originalTransformed[2,2,3,3] + originalTransformed[3,3,1,1] + originalTransformed[3,3,2,2], 6)
+		originalTransformed[1,1,2,2] = val
+		originalTransformed[1,1,3,3] = val
+		originalTransformed[2,2,1,1] = val
+		originalTransformed[2,2,3,3] = val
+		originalTransformed[3,3,1,1] = val
+		originalTransformed[3,3,2,2] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,2,1] + originalTransformed[1,3,3,1] + originalTransformed[2,1,1,2] +
+											originalTransformed[2,3,3,2] + originalTransformed[3,1,1,3] + originalTransformed[3,2,2,3], 6)
+		originalTransformed[1,2,2,1] = val
+		originalTransformed[1,3,3,1] = val
+		originalTransformed[2,1,1,2] = val
+		originalTransformed[2,3,3,2] = val
+		originalTransformed[3,1,1,3] = val
+		originalTransformed[3,2,2,3] = val
+
+
+	elif model == "K2P":
+		val = mpmath.fdiv(originalTransformed[0,0,1,1] + originalTransformed[0,0,3,3], 2)
+		originalTransformed[0,0,1,1] = val
+		originalTransformed[0,0,3,3] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,0,1] + originalTransformed[0,3,0,3], 2)
+		originalTransformed[0,1,0,1] = val
+		originalTransformed[0,3,0,3] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,1,0] + originalTransformed[0,3,3,0], 2)
+		originalTransformed[0,1,1,0] = val
+		originalTransformed[0,3,3,0] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,2,3] + originalTransformed[0,3,2,1], 2)
+		originalTransformed[0,1,2,3] = val
+		originalTransformed[0,3,2,1] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,3,2] + originalTransformed[0,3,1,2], 2)
+		originalTransformed[0,1,3,2] = val
+		originalTransformed[0,3,1,2] = val
+	
+		val = mpmath.fdiv(originalTransformed[0,2,1,3] + originalTransformed[0,2,3,1], 2)
+		originalTransformed[0,2,1,3] = val
+		originalTransformed[0,2,3,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,0,0,1] + originalTransformed[3,0,0,3], 2)
+		originalTransformed[1,0,0,1] = val
+		originalTransformed[3,0,0,3] = val
+
+		val = mpmath.fdiv(originalTransformed[1,0,1,0] + originalTransformed[3,0,3,0], 2)
+		originalTransformed[1,0,1,0] = val
+		originalTransformed[3,0,3,0] = val
+
+		val = mpmath.fdiv(originalTransformed[1,0,2,3] + originalTransformed[3,0,2,1], 2)
+		originalTransformed[1,0,2,3] = val
+		originalTransformed[3,0,2,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,0,3,2] + originalTransformed[3,0,1,2], 2)
+		originalTransformed[1,0,3,2] = val
+		originalTransformed[3,0,1,2] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,0,0] + originalTransformed[3,3,0,0], 2)
+		originalTransformed[1,1,0,0] = val
+		originalTransformed[3,3,0,0] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,1,1] + originalTransformed[3,3,3,3], 2)
+		originalTransformed[1,1,1,1] = val
+		originalTransformed[3,3,3,3] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,2,2] + originalTransformed[3,3,2,2], 2)
+		originalTransformed[1,1,2,2] = val
+		originalTransformed[3,3,2,2] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,3,3] + originalTransformed[3,3,1,1], 2)
+		originalTransformed[1,1,3,3] = val
+		originalTransformed[3,3,1,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,0,3] + originalTransformed[3,2,0,1], 2)
+		originalTransformed[1,2,0,3] = val
+		originalTransformed[3,2,0,1] = val		
+
+		val = mpmath.fdiv(originalTransformed[1,2,1,2] + originalTransformed[3,2,3,2], 2)
+		originalTransformed[1,2,1,2] = val
+		originalTransformed[3,2,3,2] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,2,1] + originalTransformed[3,2,2,3], 2)
+		originalTransformed[1,2,2,1] = val
+		originalTransformed[3,2,2,3] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,3,0] + originalTransformed[3,2,1,0], 2)
+		originalTransformed[1,2,3,0] = val
+		originalTransformed[3,2,1,0] = val
+
+		val = mpmath.fdiv(originalTransformed[1,3,0,2] + originalTransformed[3,1,0,2], 2)
+		originalTransformed[1,3,0,2] = val
+		originalTransformed[3,1,0,2] = val
+
+		val = mpmath.fdiv(originalTransformed[1,3,1,3] + originalTransformed[3,1,3,1], 2)
+		originalTransformed[1,3,1,3] = val
+		originalTransformed[3,1,3,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,3,2,0] + originalTransformed[3,1,2,0], 2)
+		originalTransformed[1,3,2,0] = val
+		originalTransformed[3,1,2,0] = val
+
+		val = mpmath.fdiv(originalTransformed[2,0,1,3] + originalTransformed[2,0,3,1], 2)
+		originalTransformed[2,0,1,3] = val
+		originalTransformed[2,0,3,1] = val
+
+		val = mpmath.fdiv(originalTransformed[2,1,0,3] + originalTransformed[2,3,0,1], 2)
+		originalTransformed[2,1,0,3] = val
+		originalTransformed[2,3,0,1] = val
+
+		val = mpmath.fdiv(originalTransformed[2,1,1,2] + originalTransformed[2,3,3,2], 2)
+		originalTransformed[2,1,1,2] = val
+		originalTransformed[2,3,3,2] = val
+
+		val = mpmath.fdiv(originalTransformed[2,1,2,1] + originalTransformed[2,3,2,3], 2)
+		originalTransformed[2,1,2,1] = val
+		originalTransformed[2,3,2,3] = val
+
+		val = mpmath.fdiv(originalTransformed[2,1,3,0] + originalTransformed[2,3,1,0], 2)
+		originalTransformed[2,1,3,0] = val
+		originalTransformed[2,3,1,0] = val
+
+		val = mpmath.fdiv(originalTransformed[2,2,1,1] + originalTransformed[2,2,3,3], 2)
+		originalTransformed[2,2,1,1] = val
+		originalTransformed[2,2,3,3] = val
+
 	for perm in permutations:
 		dictionaryString = "("+ str(MSA.index[perm[0]]) + "," + str(MSA.index[perm[1]]) + "," + str(MSA.index[perm[2]]) + "," + str(MSA.index[perm[3]]) + ")"
 		
@@ -169,7 +374,7 @@ def evaluateBootstrap(MSA, invariants, numSamples, seed):
 			minScore = score
 			minPermString = dictionaryString
 
-		#Check for trees
+	#Check for trees
 	sortedScores = sorted(allScores.items(), key=operator.itemgetter(1))
 	if sortedScores[7][1] < mpmath.fmul(multiplierForTrees1, sortedScores[0][1]) and sortedScores[8][1] > mpmath.fmul(multiplierForTrees2, sortedScores[7][1]):
 		network1 = sortedScores[8][0]
@@ -211,48 +416,37 @@ if __name__ == '__main__':
 	numberOfBootstraps = 100
 	doPlots = False
 	numProcesses = 4
+	model = "JC"
 
 	try:
-		opts, args = getopt.getopt(sys.argv[1:],"ha:i:s:t:b:")
+		opts, args = getopt.getopt(sys.argv[1:],"ha:i:m:t:")
 	except getopt.GetoptError:
 		print("Option not recognised.")
-		print("python evaluate.py -a <MSA file> -i <invariants file> -s <scoring method> -b <bootstrap replicates> -t <threads>")
-		print("python evaluate.py -h for further usage instructions.")
+		print("python evaluate_bootstrap.py -a <MSA file> -i <invariants file> -m <model> -t <threads>")
+		print("python evaluate_bootstrap.py -h for further usage instructions.")
 		sys.exit(2)
 	for opt, arg in opts:
 		if opt == "-h":
-			print("python evaluate.py -a <MSA file> -i <invariants file> -s <scoring method>")
+			print("python evaluate_bootstrap.py -a <MSA file> -i <invariants file> -m <model> -t <threads>")
 			print("-a <MSA file>\t\t Multiple sequence alignment file.")
 			print("-i <invariants file>\t\t File containing list of polynomial invariants to use in Fourier coordinates.")
-			print("-s <scoring method>\t\t Method of scoring networks from invariants.")
-			print("-b <sbootstrap replicates>\t Number of bootstrap replicates to perform. Default 100.")
-			print("-t <threads>\t\t Number of threads (i.e. simultaneous bootstrap replicates). Default 1.")
+			print("-m <model>\t\t Either JC or K2P.")
+			print("-t <threads>\t\t Number of threads to use.")
 			sys.exit()
 		elif opt in ("-a"):
 			MSAFilename = arg
 		elif opt in ("-i"):
 			NetworkGBFilename = arg
-		elif opt in ("-s"):
-			if arg.lower() == "1norm":
-				scoringFunction = get1Norm
-			elif arg.lower() == "1normnormalised":
-				scoringFunction = get1NormNormalised
-			elif arg.lower() == "euclideannorm":
-				scoringFunction = getEuclideanNorm
-			elif arg.lower() == "maxnorm":
-				scoringFunction = getMaxNorm
-			elif arg.lower() == "product":
-				scoringFunction = getProdScore
-			elif arg.lower() == "climbing":
-				climbingScore = True
-				scoringFunction = getClimbingScore
+		elif opt in ("-m"):
+			if arg.upper() == "JC":
+				model = "JC"
+			elif arg.upper() == "K2P":
+				model = "K2P"
 			else:
-				print("Error: Could not understand scoring method " + arg)
+				print("Error: Could not understand model" + arg)
 				sys.exit(2)
 		elif opt in ("-t"):
 			numProcesses = int(arg)
-		elif opt in ("-b"):
-			numberOfBootstraps = int(arg)
 
 	if len(MSAFilename) == 0:
 		print("Error: You must provide an MSA file with -a.")
@@ -292,12 +486,14 @@ if __name__ == '__main__':
 	winners["((" + sortedDictStrings[0] + "," + sortedDictStrings[1] + "),(" + sortedDictStrings[2] +  "," + sortedDictStrings[3] + "))"] = 0
 	winners["((" + sortedDictStrings[0] + "," + sortedDictStrings[2] + "),(" + sortedDictStrings[1] +  "," + sortedDictStrings[3] + "))"] = 0
 	winners["((" + sortedDictStrings[0] + "," + sortedDictStrings[3] + "),(" + sortedDictStrings[1] +  "," + sortedDictStrings[2] + "))"] = 0
+	
 	#Permutations of the 4-cycle network: = S_4 / <(24)>
 	permutations = [(0,1,2,3),(0,2,1,3),(0,1,3,2),(1,2,0,3),(1,0,2,3),(1,0,3,2),(2,1,0,3),(2,0,1,3),(2,0,3,1),(3,1,0,2),(3,0,1,2),(3,0,2,1)]
 	for perm in permutations:
 		dictionaryString = "("+ str(originalMSA.index[perm[0]]) + "," + str(originalMSA.index[perm[1]]) + "," + str(originalMSA.index[perm[2]]) + "," + str(originalMSA.index[perm[3]]) + ")"
 		winners[dictionaryString] = 0
 
+	MSALength = originalMSA.shape[1]
 	numSamples =  0 
 	for col in originalMSA.iter_positions(ignore_metadata=True):
 		if "-" not in col:
@@ -307,7 +503,7 @@ if __name__ == '__main__':
 	results = dict()
 	pool = Pool(processes=numProcesses)
 	for x in range(numberOfBootstraps):
-		results[x] = pool.apply_async(evaluateBootstrap, args=(originalMSA, networkPolys, numSamples, x))
+		results[x] = pool.apply_async(evaluateBootstrap, args=(originalMSA, networkPolys, numSamples, x, model))
 
 	pool.close()
 	pool.join()
@@ -318,7 +514,8 @@ if __name__ == '__main__':
 	for network in winners.keys():
 		print(network + ": " + str(winners[network] * 100.0 / numberOfBootstraps) + "%")
 
+
 	end = time.time()
-	print("evaluate_v2_with_bootstrap.py time: " + str(end - start))
+	print("evaluate_bootstrap.py time: " + str(end - start))
 
 

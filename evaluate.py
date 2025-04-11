@@ -90,16 +90,17 @@ MSAFilename = ""
 scoringFunction = get1Norm
 climbingScore = False
 
-multiplierForTrees1 = 3
-multiplierForTrees2 = 2
+multiplierForTrees1 = 5
+multiplierForTrees2 = 5
 
 fourierValues = ""
+model = "JC"
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:],"ha:i:s:f:")
+	opts, args = getopt.getopt(sys.argv[1:],"ha:i:s:f:m:")
 except getopt.GetoptError:
 	print("Option not recognised.")
-	print("python evaluate.py -a <MSA file> -i <invariants file> -s <scoring method>")
+	print("python evaluate.py -a <MSA file> -i <invariants file> -m <model>")
 	print("python evaluate.py -h for further usage instructions.")
 	sys.exit(2)
 for opt, arg in opts:
@@ -107,7 +108,7 @@ for opt, arg in opts:
 		print("python evaluate.py -a <MSA file> -i <invariants file> -s <scoring method>")
 		print("-a <MSA file>\t\t Multiple sequence alignment file.")
 		print("-i <invariants file>\t\t File containing list of polynomial invariants to use in Fourier coordinates.")
-		print("-s <scoring method>\t\t Method of scoring networks from invariants.")
+		print("-m <model>\t\t Either JC or K2P.")
 		sys.exit()
 	elif opt in ("-a"):
 		MSAFilename = arg
@@ -130,12 +131,27 @@ for opt, arg in opts:
 			climbingScore = True
 			scoringFunction = getClimbingScore
 		else:
-			print("Error: Could not understand scoring method " + arg)
+			print("ERROR: Could not understand scoring method " + arg)
 			sys.exit(2)
+	elif opt in ("-m"):
+		if arg.upper() == "JC":
+			model = "JC"
+		elif arg.upper() == "K2P":
+			model = "K2P"
+		else:
+			print("ERROR: Could not understand model " + arg)
+			sys.exit(2)
+	else:
+		print("ERROR: Could not understand option " + opt)
+		sys.exit(2)
 
 if len(MSAFilename) == 0 and len(fourierValues) == 0:
-	print("Error: You must provide an MSA file with -a.")
+	print("ERROR: You must provide an MSA file with -a.")
 	sys.exit(2)
+
+if len(fourierValues) > 0 and model != "JC":
+	print("ERROR: Fourier values can only be provided when the model is JC.")
+	sys.exit(2)	
 
 # Read in polynomials
 #print("Reading invariants...")
@@ -204,6 +220,212 @@ if len(MSAFilename) > 0:
 									if originalFrequencies[w,x,y,z] > 0:
 										transformed_value = mpmath.fadd(transformed_value, mpmath.fprod([Chi(i,w), Chi(j,x), Chi(k,y), Chi(l,z), originalFrequencies[w,x,y,z]]))
 					originalTransformed[i,j,k,l] = mpmath.fdiv(transformed_value, mpmath.power(4,4))
+
+	if model == "JC":
+		# Average over JC classes
+		val = mpmath.fdiv(originalTransformed[0,0,1,1] + originalTransformed[0,0,2,2] + originalTransformed[0,0,3,3], 3)
+		originalTransformed[0,0,1,1] = val
+		originalTransformed[0,0,2,2] = val
+		originalTransformed[0,0,3,3] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,0,1] + originalTransformed[0,2,0,2] + originalTransformed[0,3,0,3], 3)
+		originalTransformed[0,1,0,1] = val
+		originalTransformed[0,2,0,2] = val
+		originalTransformed[0,3,0,3] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,1,0] + originalTransformed[0,2,2,0] + originalTransformed[0,3,3,0], 3)
+		originalTransformed[0,1,1,0] = val
+		originalTransformed[0,2,2,0] = val
+		originalTransformed[0,3,3,0] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,2,3] + originalTransformed[0,1,3,2] + originalTransformed[0,2,1,3] +
+											originalTransformed[0,2,3,1] + originalTransformed[0,3,1,2] + originalTransformed[0,3,2,1], 6)
+		originalTransformed[0,1,2,3] = val
+		originalTransformed[0,1,3,2] = val
+		originalTransformed[0,2,1,3] = val
+		originalTransformed[0,2,3,1] = val
+		originalTransformed[0,3,1,2] = val
+		originalTransformed[0,3,2,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,0,0,1] + originalTransformed[2,0,0,2] + originalTransformed[3,0,0,3], 3)
+		originalTransformed[1,0,0,1] = val
+		originalTransformed[2,0,0,2] = val
+		originalTransformed[3,0,0,3] = val
+
+		val = mpmath.fdiv(originalTransformed[1,0,2,3] + originalTransformed[1,0,3,2] + originalTransformed[2,0,1,3] +
+											originalTransformed[2,0,3,1] + originalTransformed[3,0,1,2] + originalTransformed[3,0,2,1], 6)
+		originalTransformed[1,0,2,3] = val
+		originalTransformed[1,0,3,2] = val
+		originalTransformed[2,0,1,3] = val
+		originalTransformed[2,0,3,1] = val
+		originalTransformed[3,0,1,2] = val
+		originalTransformed[3,0,2,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,0,0] + originalTransformed[2,2,0,0] + originalTransformed[3,3,0,0], 3)
+		originalTransformed[1,1,0,0] = val
+		originalTransformed[2,2,0,0] = val
+		originalTransformed[3,3,0,0] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,1,1] + originalTransformed[2,2,2,2] + originalTransformed[3,3,3,3], 3)
+		originalTransformed[1,1,1,1] = val
+		originalTransformed[2,2,2,2] = val
+		originalTransformed[3,3,3,3] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,0,3] + originalTransformed[1,3,0,2] + originalTransformed[2,1,0,3] +
+											originalTransformed[2,3,0,1] + originalTransformed[3,1,0,2] + originalTransformed[3,2,0,1], 6)
+		originalTransformed[1,2,0,3] = val
+		originalTransformed[1,3,0,2] = val
+		originalTransformed[2,1,0,3] = val
+		originalTransformed[2,3,0,1] = val
+		originalTransformed[3,1,0,2] = val
+		originalTransformed[3,2,0,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,1,2] + originalTransformed[1,3,1,3] + originalTransformed[2,1,2,1] +
+											originalTransformed[2,3,2,3] + originalTransformed[3,1,3,1] + originalTransformed[3,2,3,2], 6)
+		originalTransformed[1,2,1,2] = val
+		originalTransformed[1,3,1,3] = val
+		originalTransformed[2,1,2,1] = val
+		originalTransformed[2,3,2,3] = val
+		originalTransformed[3,1,3,1] = val
+		originalTransformed[3,2,3,2] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,3,0] + originalTransformed[1,3,2,0] + originalTransformed[2,1,3,0] +
+											originalTransformed[2,3,1,0] + originalTransformed[3,1,2,0] + originalTransformed[3,2,1,0], 6)
+		originalTransformed[1,2,3,0] = val
+		originalTransformed[1,3,2,0] = val
+		originalTransformed[2,1,3,0] = val
+		originalTransformed[2,3,1,0] = val
+		originalTransformed[3,1,2,0] = val
+		originalTransformed[3,2,1,0] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,2,2] + originalTransformed[1,1,3,3] + originalTransformed[2,2,1,1] +
+											originalTransformed[2,2,3,3] + originalTransformed[3,3,1,1] + originalTransformed[3,3,2,2], 6)
+		originalTransformed[1,1,2,2] = val
+		originalTransformed[1,1,3,3] = val
+		originalTransformed[2,2,1,1] = val
+		originalTransformed[2,2,3,3] = val
+		originalTransformed[3,3,1,1] = val
+		originalTransformed[3,3,2,2] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,2,1] + originalTransformed[1,3,3,1] + originalTransformed[2,1,1,2] +
+											originalTransformed[2,3,3,2] + originalTransformed[3,1,1,3] + originalTransformed[3,2,2,3], 6)
+		originalTransformed[1,2,2,1] = val
+		originalTransformed[1,3,3,1] = val
+		originalTransformed[2,1,1,2] = val
+		originalTransformed[2,3,3,2] = val
+		originalTransformed[3,1,1,3] = val
+		originalTransformed[3,2,2,3] = val
+
+
+	elif model == "K2P":
+		val = mpmath.fdiv(originalTransformed[0,0,1,1] + originalTransformed[0,0,3,3], 2)
+		originalTransformed[0,0,1,1] = val
+		originalTransformed[0,0,3,3] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,0,1] + originalTransformed[0,3,0,3], 2)
+		originalTransformed[0,1,0,1] = val
+		originalTransformed[0,3,0,3] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,1,0] + originalTransformed[0,3,3,0], 2)
+		originalTransformed[0,1,1,0] = val
+		originalTransformed[0,3,3,0] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,2,3] + originalTransformed[0,3,2,1], 2)
+		originalTransformed[0,1,2,3] = val
+		originalTransformed[0,3,2,1] = val
+
+		val = mpmath.fdiv(originalTransformed[0,1,3,2] + originalTransformed[0,3,1,2], 2)
+		originalTransformed[0,1,3,2] = val
+		originalTransformed[0,3,1,2] = val
+	
+		val = mpmath.fdiv(originalTransformed[0,2,1,3] + originalTransformed[0,2,3,1], 2)
+		originalTransformed[0,2,1,3] = val
+		originalTransformed[0,2,3,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,0,0,1] + originalTransformed[3,0,0,3], 2)
+		originalTransformed[1,0,0,1] = val
+		originalTransformed[3,0,0,3] = val
+
+		val = mpmath.fdiv(originalTransformed[1,0,1,0] + originalTransformed[3,0,3,0], 2)
+		originalTransformed[1,0,1,0] = val
+		originalTransformed[3,0,3,0] = val
+
+		val = mpmath.fdiv(originalTransformed[1,0,2,3] + originalTransformed[3,0,2,1], 2)
+		originalTransformed[1,0,2,3] = val
+		originalTransformed[3,0,2,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,0,3,2] + originalTransformed[3,0,1,2], 2)
+		originalTransformed[1,0,3,2] = val
+		originalTransformed[3,0,1,2] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,0,0] + originalTransformed[3,3,0,0], 2)
+		originalTransformed[1,1,0,0] = val
+		originalTransformed[3,3,0,0] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,1,1] + originalTransformed[3,3,3,3], 2)
+		originalTransformed[1,1,1,1] = val
+		originalTransformed[3,3,3,3] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,2,2] + originalTransformed[3,3,2,2], 2)
+		originalTransformed[1,1,2,2] = val
+		originalTransformed[3,3,2,2] = val
+
+		val = mpmath.fdiv(originalTransformed[1,1,3,3] + originalTransformed[3,3,1,1], 2)
+		originalTransformed[1,1,3,3] = val
+		originalTransformed[3,3,1,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,0,3] + originalTransformed[3,2,0,1], 2)
+		originalTransformed[1,2,0,3] = val
+		originalTransformed[3,2,0,1] = val		
+
+		val = mpmath.fdiv(originalTransformed[1,2,1,2] + originalTransformed[3,2,3,2], 2)
+		originalTransformed[1,2,1,2] = val
+		originalTransformed[3,2,3,2] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,2,1] + originalTransformed[3,2,2,3], 2)
+		originalTransformed[1,2,2,1] = val
+		originalTransformed[3,2,2,3] = val
+
+		val = mpmath.fdiv(originalTransformed[1,2,3,0] + originalTransformed[3,2,1,0], 2)
+		originalTransformed[1,2,3,0] = val
+		originalTransformed[3,2,1,0] = val
+
+		val = mpmath.fdiv(originalTransformed[1,3,0,2] + originalTransformed[3,1,0,2], 2)
+		originalTransformed[1,3,0,2] = val
+		originalTransformed[3,1,0,2] = val
+
+		val = mpmath.fdiv(originalTransformed[1,3,1,3] + originalTransformed[3,1,3,1], 2)
+		originalTransformed[1,3,1,3] = val
+		originalTransformed[3,1,3,1] = val
+
+		val = mpmath.fdiv(originalTransformed[1,3,2,0] + originalTransformed[3,1,2,0], 2)
+		originalTransformed[1,3,2,0] = val
+		originalTransformed[3,1,2,0] = val
+
+		val = mpmath.fdiv(originalTransformed[2,0,1,3] + originalTransformed[2,0,3,1], 2)
+		originalTransformed[2,0,1,3] = val
+		originalTransformed[2,0,3,1] = val
+
+		val = mpmath.fdiv(originalTransformed[2,1,0,3] + originalTransformed[2,3,0,1], 2)
+		originalTransformed[2,1,0,3] = val
+		originalTransformed[2,3,0,1] = val
+
+		val = mpmath.fdiv(originalTransformed[2,1,1,2] + originalTransformed[2,3,3,2], 2)
+		originalTransformed[2,1,1,2] = val
+		originalTransformed[2,3,3,2] = val
+
+		val = mpmath.fdiv(originalTransformed[2,1,2,1] + originalTransformed[2,3,2,3], 2)
+		originalTransformed[2,1,2,1] = val
+		originalTransformed[2,3,2,3] = val
+
+		val = mpmath.fdiv(originalTransformed[2,1,3,0] + originalTransformed[2,3,1,0], 2)
+		originalTransformed[2,1,3,0] = val
+		originalTransformed[2,3,1,0] = val
+
+		val = mpmath.fdiv(originalTransformed[2,2,1,1] + originalTransformed[2,2,3,3], 2)
+		originalTransformed[2,2,1,1] = val
+		originalTransformed[2,2,3,3] = val
+
 else:
 	# Read in Fourier values from string
 	stringValues = fourierValues.split(",")
@@ -371,6 +593,6 @@ if sortedScores[7][1] < multiplierForTrees1 * sortedScores[0][1] and sortedScore
 			print("Tree-like evolution detected with tree " + treeString + ".")
 
 end = time.time()
-print("evaluate_v3.py time: " + str(end - start))
+print("evaluate_v4.py time: " + str(end - start))
 
 
