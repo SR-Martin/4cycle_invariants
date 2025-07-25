@@ -3,7 +3,7 @@
 import sys, getopt, errno, time
 import numpy as np
 import mpmath
-from skbio import DNA, TabularMSA
+from skbio import DNA, TabularMSA, io
 from multiprocessing import Pool
 import utils.polynomials
 from utils.polynomials import Polynomial
@@ -454,7 +454,7 @@ if __name__ == '__main__':
 
 	try:
 		originalMSA = TabularMSA.read(MSAFilename, constructor=DNA)
-	except (ValueError, TypeError, skbio.io.UnrecognizedFormatError) as e:
+	except (ValueError, TypeError, io.UnrecognizedFormatError) as e:
 		print(e)
 		sys.exit(2)
 	if not originalMSA or len(originalMSA) != 4:
